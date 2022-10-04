@@ -4,7 +4,7 @@ using Plots
 
 const sigma = 1.5
 const beta = 0.993422
-const q=0.998
+const q = 0.998
 global pi=[0.925 0.075;0.5 0.5]
 
 function u(c)
@@ -15,18 +15,16 @@ function u(c)
     end
 end
 
-
-
 grid_A = LinRange(-4, 4, 100)
 grid_e = [1,0.1]
-
 
 # Initiate the value function guess
 global V = zeros(length(grid_A),length(grid_e))
 global g = zeros(length(grid_A),length(grid_e))
+global p = zeros(length(grid_A),length(grid_e))
 
 max_iter = 2000
-tolerance = 0.00000001
+tolerance = 1e-5
 
 for iter = 1:max_iter
     global TV = zeros(length(grid_A),length(grid_e))
@@ -46,6 +44,7 @@ for iter = 1:max_iter
             ax, bx = findmax(U)
             TV[idx_a,idx_e]=ax
             g[idx_a, idx_e]=bx
+            p[idx_a, idx_e]=grid_A[bx]
         end
     end
     dev = maximum(abs.(TV-V))
@@ -56,6 +55,61 @@ for iter = 1:max_iter
     end
 end
 
-plot(grid_A, g[:,1])
-plot!(grid_A, g[:,2])
+plot(grid_A, p[:,1])
+plot!(grid_A, p[:,2])
 plot!(grid_A, grid_A)
+savefig("polfunc.png")
+
+#Task3
+
+Transition=zeros(200,200)
+ae_dist=zeros(1,200)
+
+
+for (idx_e_r, e) in enumerate(grid_e)
+    for (idx_e_c, e) in enumerate(grid_e)
+        for i in 1:100
+            Transition[floor(Int, i+100*(idx_e_r-1)),floor(Int, 100*(idx_e_c-1)+g[i,idx_e_c])]=pi[idx_e_r,idx_e_c]
+        end
+    end
+end
+df=DataFrame(Transition, :auto)
+CSV.write("transition_m.csv", df)
+
+#= Transition=zeros(200,200)
+ae_dist=ones(1,200)
+for (idx_s, s) in enumerate(ae_dist)
+    for (idx_s2, s) in enumerate(ae_dist)
+        pi_r=(idx_s>100)+1
+        pi_c=(idx_s2>100)+1
+        a_idx=mod(idx_s,100)
+        if a_idx == 0
+            a_idx=100
+        end
+        if g[a_idx,pi_r]==idx_s2
+            Transition[idx_s, idx_s2]=pi[pi_r,pi_c]
+        end
+    end
+end
+ =#
+ #using CSV, DataFrames
+
+
+ ae_dist_init=ones(1,200)
+ae_dist_init=ae_dist_init/200
+ae_dist_new=deepcopy(ae_dist_init)
+
+for i=1:999999999999999999999999999999999999999999999
+    ae_dist_new=ae_dist_init*Transition
+    diff=maximum(abs.(ae_dist_init-ae_dist_new))
+    ae_dist_init=ae_dist_new
+    if diff<0.00000001
+        break
+    end
+end    
+
+sum(ae_dist_init)
+plot(grid_A,ae_dist_init[1,1:100],label="e_H")
+plot!(grid_A,ae_dist_init[1,101:200],label="e_L")
+plot!(grid_A,(ae_dist_init[1,1:100]+ae_dist_init[1,101:200]),label="sum")
+
