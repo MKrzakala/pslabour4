@@ -5,6 +5,8 @@ using Statistics
 using DataFrames
 using CSV
 
+cd("C:\\Users\\mpkrz\\OneDrive - SGH\\Dokumenty\\GitHub\\pslabour4")
+
 const sigma = 1.5
 const beta = 0.993422
 const q = 0.998
@@ -131,6 +133,8 @@ ae_dist_sim[2,501:1000].=0
 ae_dist_sim_init=deepcopy(ae_dist_sim)
 ae_dist_hist=zeros(1001,1000)
 ae_dist_hist[1,1:1000]=ae_dist_sim_init[1,1:1000]
+ae_dist_sim_mean=zeros(1001)
+ae_dist_sim_mean[1]=avg_a+(0.1+1)/2
 function findclose(to_find,lin_range)
     c=lin_range.-to_find
     d=collect(c)
@@ -143,10 +147,14 @@ for t = 1:1000
     random=rand(1,1000)
     for i = 1:1000
         if random[i]<pi[(floor(Int,ae_dist_sim_init[2,i]+1)),1] ae_dist_sim[2,i]=1 else (ae_dist_sim[2,i]=0) end
-        ae_dist_sim[1,i]=p[findclose(ae_dist_sim_init[1,i],grid_A),floor(Int,(ae_dist_sim_init[2,i]+1))]
+        if ae_dist_sim[2,i]==1 e=1 else e=0.1 end
+        ae_dist_sim[1,i]=p[findclose(ae_dist_sim_init[1,i],grid_A),floor(Int,(ae_dist_sim_init[2,i]+1))]+e
     end
     ae_dist_hist[t+1,1:1000]=ae_dist_sim[1,1:1000]
+    ae_dist_sim_mean[t+1]=mean(ae_dist_sim[1,1:1000])
     ae_dist_sim_init=deepcopy(ae_dist_sim)
 end
+plot(ae_dist_sim_mean)
+savefig("plot_mean.png")
 plot(ae_dist_hist[:,2])
 
