@@ -129,7 +129,8 @@ ae_dist_sim[1,501:1000].=avg_a+0.1
 ae_dist_sim[2,1:500].=1
 ae_dist_sim[2,501:1000].=0
 ae_dist_sim_init=deepcopy(ae_dist_sim)
-
+ae_dist_hist=zeros(1001,1000)
+ae_dist_hist[1,1:1000]=ae_dist_sim_init[1,1:1000]
 function findclose(to_find,lin_range)
     c=lin_range.-to_find
     d=collect(c)
@@ -144,6 +145,8 @@ for t = 1:1000
         if random[i]<pi[(floor(Int,ae_dist_sim_init[2,i]+1)),1] ae_dist_sim[2,i]=1 else (ae_dist_sim[2,i]=0) end
         ae_dist_sim[1,i]=p[findclose(ae_dist_sim_init[1,i],grid_A),floor(Int,(ae_dist_sim_init[2,i]+1))]
     end
+    ae_dist_hist[t+1,1:1000]=ae_dist_sim[1,1:1000]
     ae_dist_sim_init=deepcopy(ae_dist_sim)
 end
+plot(ae_dist_hist[:,2])
 
