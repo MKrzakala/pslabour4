@@ -1,6 +1,9 @@
 #LabourInequality PS4 Krzakala
 #Task 2
 using Plots
+using Statistics
+using DataFrames
+using CSV
 
 const sigma = 1.5
 const beta = 0.993422
@@ -99,11 +102,11 @@ end
 ae_dist_init=ae_dist_init/200
 ae_dist_new=deepcopy(ae_dist_init)
 
-for i=1:999999999999999999999999999999999999999999999
+for i=1:99999
     ae_dist_new=ae_dist_init*Transition
     diff=maximum(abs.(ae_dist_init-ae_dist_new))
     ae_dist_init=ae_dist_new
-    if diff<0.00000001
+    if diff<0.00001
         break
     end
 end    
@@ -113,3 +116,22 @@ plot(grid_A,ae_dist_init[1,1:100],label="e_H")
 plot!(grid_A,ae_dist_init[1,101:200],label="e_L")
 plot!(grid_A,(ae_dist_init[1,1:100]+ae_dist_init[1,101:200]),label="sum")
 
+avg_a=mean(ae_dist_init)
+#Part D
+ae_dist_sim=zeros(2,1000)
+ae_dist_sim[1,1:500].=avg_a+1
+ae_dist_sim[1,501:1000].=avg_a+0.1
+ae_dist_sim[2,1:500].=1
+ae_dist_sim[2,501:1000].=0
+ae_dist_sim_init=deepcopy(ae_dist_sim)
+
+for t = 1:1000
+    print(t)
+    random=rand(1,1000)
+    for i = 1:1000
+        if random[i]<pi[(floor(Int,ae_dist_sim_init[2,i]+1)),1] ae_dist_sim[2,i]=1 else (ae_dist_sim[2,i]=0) end
+        #Here I need to correct p[] to get the value from the grid_A
+        ae_dist_sim[1,i]=p[floor(Int,ae_dist_sim_init[1,i]),floor(Int,(ae_dist_sim_init[2,i]+1))]
+    end
+    ae_dist_sim_init=deepcopy(ae_dist_sim)
+end
