@@ -117,6 +117,11 @@ plot!(grid_A,ae_dist_init[1,101:200],label="e_L")
 plot!(grid_A,(ae_dist_init[1,1:100]+ae_dist_init[1,101:200]),label="sum")
 
 avg_a=mean(ae_dist_init)
+avg_a_idx=findfirst(index->index>=avg_a,grid_A)
+grid_A[avg_a_idx]
+avg_a
+grid_A[avg_a_idx-1]
+
 #Part D
 ae_dist_sim=zeros(2,1000)
 ae_dist_sim[1,1:500].=avg_a+1
@@ -125,13 +130,20 @@ ae_dist_sim[2,1:500].=1
 ae_dist_sim[2,501:1000].=0
 ae_dist_sim_init=deepcopy(ae_dist_sim)
 
+function findclose(to_find,lin_range)
+    c=lin_range.-to_find
+    d=collect(c)
+    e=broadcast(abs, d)
+    findmin(e)[2]
+end
+
 for t = 1:1000
     print(t)
     random=rand(1,1000)
     for i = 1:1000
         if random[i]<pi[(floor(Int,ae_dist_sim_init[2,i]+1)),1] ae_dist_sim[2,i]=1 else (ae_dist_sim[2,i]=0) end
-        #Here I need to correct p[] to get the value from the grid_A
-        ae_dist_sim[1,i]=p[floor(Int,ae_dist_sim_init[1,i]),floor(Int,(ae_dist_sim_init[2,i]+1))]
+        ae_dist_sim[1,i]=p[findclose(ae_dist_sim_init[1,i],grid_A),floor(Int,(ae_dist_sim_init[2,i]+1))]
     end
     ae_dist_sim_init=deepcopy(ae_dist_sim)
 end
+
