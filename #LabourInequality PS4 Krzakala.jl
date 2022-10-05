@@ -134,6 +134,10 @@ ae_dist_sim_init=deepcopy(ae_dist_sim)
 ae_dist_hist=zeros(1001,1000)
 ae_dist_hist[1,1:1000]=ae_dist_sim_init[1,1:1000]
 ae_dist_sim_mean=zeros(1001)
+ae_dist_sim_var_logs=zeros(1001)
+ae_dist_sim_var_logs[1]=var(broadcast(log,ae_dist_sim_init[1,:]))
+ae_dist_sim_var=zeros(1001)
+ae_dist_sim_var[1]=var(ae_dist_sim_init[1,:])
 ae_dist_sim_mean[1]=avg_a+(0.1+1)/2
 function findclose(to_find,lin_range)
     c=lin_range.-to_find
@@ -152,9 +156,15 @@ for t = 1:1000
     end
     ae_dist_hist[t+1,1:1000]=ae_dist_sim[1,1:1000]
     ae_dist_sim_mean[t+1]=mean(ae_dist_sim[1,1:1000])
+    ae_dist_sim_var_logs[t+1]=var(broadcast(log,ae_dist_sim[1,1:1000]))
+    ae_dist_sim_var[t+1]=var(ae_dist_sim[1,1:1000])
     ae_dist_sim_init=deepcopy(ae_dist_sim)
 end
 plot(ae_dist_sim_mean)
 savefig("plot_mean.png")
+plot(ae_dist_var_logs)
+savefig("plot_varlogs.png")
+plot(ae_dist_sim_var)
+savefig("plot_var.png")
 plot(ae_dist_hist[:,2])
 
